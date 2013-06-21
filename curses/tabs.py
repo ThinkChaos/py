@@ -44,11 +44,11 @@ def border(tab, active=False, first=False):
                                                                               # ─────────
 
 def help(s, key_next, key_prev, key_jump, key_help, key_quit, tab_number):
-  s.addstr(0, 0, 'Next tab:       %s' % key_next)
-  s.addstr(1, 0, 'Previous tab:   %s' % key_prev)
-  s.addstr(2, 0, 'Jumpt to tab:   %s' % key_jump)
-  s.addstr(3, 0, 'Help:           %s' % key_help)
-  s.addstr(4, 0, 'Exit:           %s' % key_quit)
+  s.addstr(0, 0, 'Next tab:       %s' % '/'.join(key_next))
+  s.addstr(1, 0, 'Previous tab:   %s' % '/'.join(key_prev))
+  s.addstr(2, 0, 'Jumpt to tab:   %s' % '/'.join(key_jump))
+  s.addstr(3, 0, 'Help:           %s' % '/'.join(key_help))
+  s.addstr(4, 0, 'Exit:           %s' % '/'.join(key_quit))
   s.addstr(6, 0, 'There are a total of %i tabs.' % tab_number)
   s.addstr(7, 0, 'Press any key to continue...')
   s.getch()
@@ -60,7 +60,7 @@ def main(stdscr):
 
   # Configuration
   tab_number = 3
-  key_next = '+'
+  key_next = ['+', '=']
   key_prev = '-'
   key_jump = ':'
   key_help = 'h'
@@ -123,17 +123,17 @@ def main(stdscr):
     o = n # Save current tab ID
     while True:
       k = t.getkey()
-      if k ==  key_next:
+      if k in key_next:
         n += 1
         if n > len(tabs) - 1: n = 0 # Wrap around
         break
 
-      elif k == key_prev:
+      elif k in key_prev:
         n -= 1
         if n < 0: n = len(tabs) - 1 # Wrap around
         break
 
-      elif k == key_jump:
+      elif k in key_jump:
         try:
           t.addstr(2, 0, ' ' * (curses.COLS - 2)) # Empty line to prevenet overlapping text
           t.addstr(2, 0, 'Jump to tab: ')
@@ -148,13 +148,13 @@ def main(stdscr):
           t.addstr(2, 0, ' ' * (curses.COLS - 2))
           curses.echo(0)
 
-      elif k == key_help:
+      elif k in key_help:
         save(t, files[n])
         t.erase()
         help(t, key_next, key_prev, key_jump, key_help, key_quit, tab_number)
         t = load(files[n])
 
-      elif k == key_quit:
+      elif k in key_quit:
         quit(files)
 
     # This isn't needed in this example, but in a real
