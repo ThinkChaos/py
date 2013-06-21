@@ -43,13 +43,13 @@ def border(tab, active=False, first=False):
       tab.border(0, 0, 0, 0, 0, 0, curses.ACS_HLINE, curses.ACS_HLINE)        # │ Tab X │
                                                                               # ─────────
 
-def help(s, key_next, key_prev, key_jump, key_help, key_quit, tab_number):
-  s.addstr(0, 0, 'Next tab:       %s' % '/'.join(key_next))
-  s.addstr(1, 0, 'Previous tab:   %s' % '/'.join(key_prev))
-  s.addstr(2, 0, 'Jumpt to tab:   %s' % '/'.join(key_jump))
-  s.addstr(3, 0, 'Help:           %s' % '/'.join(key_help))
-  s.addstr(4, 0, 'Exit:           %s' % '/'.join(key_quit))
-  s.addstr(6, 0, 'There are a total of %i tabs.' % tab_number)
+def help(s, **cfg):
+  s.addstr(0, 0, 'Next tab:       %s' % '/'.join([ k for k in cfg['key_next'] if type(k) != int]))
+  s.addstr(1, 0, 'Previous tab:   %s' % '/'.join([ k for k in cfg['key_prev'] if type(k) != int]))
+  s.addstr(2, 0, 'Jumpt to tab:   %s' % '/'.join([ k for k in cfg['key_jump'] if type(k) != int]))
+  s.addstr(3, 0, 'Help:           %s' % '/'.join([ k for k in cfg['key_help'] if type(k) != int]))
+  s.addstr(4, 0, 'Exit:           %s' % '/'.join([ k for k in cfg['key_quit'] if type(k) != int]))
+  s.addstr(6, 0, 'There are a total of %i tabs.' % cfg['tab_number'])
   s.addstr(7, 0, 'Press any key to continue...')
   s.getch()
 
@@ -59,13 +59,21 @@ def main(stdscr):
   curses.use_default_colors()
 
   # Configuration
-  tab_number = 3
-  key_next = ['+', '=']
-  key_prev = '-'
-  key_jump = ':'
-  key_help = 'h'
-  key_quit = 'q'
+  cfg = {
+    'tab_number': 3,
+    'key_next': ['+', '=', curses.KEY_RIGHT, 67], # Somehow KEY_R/L doesn't work for me
+    'key_prev': ['-', '_', curses.KEY_LEFT,  68], # because my L/R key codes are 68,67
+    'key_jump': ':',
+    'key_help': 'h',
+    'key_quit': 'q',
+  }
 
+  tab_number = cfg['tab_number']
+  key_next = [ord(k) for k in cfg['key_next'] if type(k) != int ] + [k for k in cfg['key_next'] if type(k) == int ]
+  key_prev = [ord(k) for k in cfg['key_prev'] if type(k) != int ] + [k for k in cfg['key_prev'] if type(k) == int ]
+  key_jump = [ord(k) for k in cfg['key_jump'] if type(k) != int ] + [k for k in cfg['key_jump'] if type(k) == int ]
+  key_help = [ord(k) for k in cfg['key_help'] if type(k) != int ] + [k for k in cfg['key_help'] if type(k) == int ]
+  key_quit = [ord(k) for k in cfg['key_quit'] if type(k) != int ] + [k for k in cfg['key_quit'] if type(k) == int ]
 
   tabs, files = ([], [])
   d = os.path.dirname(__file__)
@@ -108,7 +116,7 @@ def main(stdscr):
   end.refresh()
 
   n = 0 # Start at tab 0
-  curses.ungetch(key_help) # Simulate press of key_help
+  curses.ungetch(key_help[0]) # Simulate press of key_help
   while True:
     # Load and display new tab
     first = False
@@ -122,7 +130,7 @@ def main(stdscr):
 
     o = n # Save current tab ID
     while True:
-      k = t.getkey()
+      k = t.getch()
       if k in key_next:
         n += 1
         if n > len(tabs) - 1: n = 0 # Wrap around
@@ -134,24 +142,20 @@ def main(stdscr):
         break
 
       elif k in key_jump:
-        try:
-          t.addstr(2, 0, ' ' * (curses.COLS - 2)) # Empty line to prevenet overlapping text
-          t.addstr(2, 0, 'Jump to tab: ')
-          curses.echo(1) # Show what's being typed
-          k = int(t.getstr()) - 1 # This is the reason for try (might not be int)
-          curses.echo(0)
-          t.addstr(2, 0, ' ' * (curses.COLS - 2))
-          if (k != n) and (k in range(tab_number)):
-            n = k
-            break
-        except:
-          t.addstr(2, 0, ' ' * (curses.COLS - 2))
-          curses.echo(0)
+        t.addstr(2, 0, 'Jump to tab: ')
+        curses.echo(1) # Show what's being typed
+        try: k = int(t.getstr()) - 1
+        except: pass
+        curses.echo(0)
+        t.addstr(2, 0, ' ' * (curses.COLS - 2))
+        if (k != n) and (k in range(tab_number)):
+          n = k
+          break
 
       elif k in key_help:
         save(t, files[n])
         t.erase()
-        help(t, key_next, key_prev, key_jump, key_help, key_quit, tab_number)
+        help(t, **cfg)
         t = load(files[n])
 
       elif k in key_quit:
