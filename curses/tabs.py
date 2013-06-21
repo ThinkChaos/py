@@ -53,6 +53,18 @@ def help(s, **cfg):
   s.addstr(7, 0, 'Press any key to continue...')
   s.getch()
 
+def readkey(tab):
+  k = ''
+  while True:
+    i = tab.getch()
+    if i == -1:
+      tab.timeout(-1)
+      break
+    else:
+      k = k + str(i)
+    tab.timeout(0)
+  return int(k)
+
 def main(stdscr):
   curses.curs_set(0)
   curses.start_color()
@@ -61,8 +73,8 @@ def main(stdscr):
   # Configuration
   cfg = {
     'tab_number': 3,
-    'key_next': ['+', '=', curses.KEY_RIGHT, 67], # Somehow KEY_R/L doesn't work for me
-    'key_prev': ['-', '_', curses.KEY_LEFT,  68], # because my L/R key codes are 68,67
+    'key_next': ['+', '=', curses.KEY_RIGHT, 279167],
+    'key_prev': ['-', '_', curses.KEY_LEFT,  279168],
     'key_jump': ':',
     'key_help': 'h',
     'key_quit': 'q',
@@ -130,7 +142,7 @@ def main(stdscr):
 
     o = n # Save current tab ID
     while True:
-      k = t.getch()
+      k = readkey(t)
       if k in key_next:
         n += 1
         if n > len(tabs) - 1: n = 0 # Wrap around
