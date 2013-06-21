@@ -146,6 +146,7 @@ def main(stdscr):
             break
         except:
           t.addstr(2, 0, ' ' * (curses.COLS - 2))
+          curses.echo(0)
 
       elif k == key_help:
         save(t, files[n])
