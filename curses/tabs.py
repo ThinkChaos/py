@@ -59,7 +59,7 @@ def main(stdscr):
   curses.use_default_colors()
 
   # Configuration
-  tab_number = 10
+  tab_number = 3
   key_next = '+'
   key_prev = '-'
   key_jump = ':'
