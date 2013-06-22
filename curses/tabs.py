@@ -36,12 +36,12 @@ def border(tab, active=False, first=False):
                                                                               # ┘       └
   else:
     if first:                                                                 # ┌───────┐
-      tab.border(0, 0, 0, 0, 0, 0, curses.ACS_ULCORNER, curses.ACS_HLINE)     # │ Tab 1 │
-                                                                              # ┌────────
+      tab.border(0, 0, 0, 0, 0, 0, curses.ACS_LTEE, curses.ACS_BTEE)          # │ Tab 1 │
+                                                                              # ├───────┴
 
     else:                                                                     # ┌───────┐
-      tab.border(0, 0, 0, 0, 0, 0, curses.ACS_HLINE, curses.ACS_HLINE)        # │ Tab X │
-                                                                              # ─────────
+      tab.border(0, 0, 0, 0, 0, 0, curses.ACS_BTEE, curses.ACS_BTEE)          # │ Tab X │
+                                                                              # ┴───────┴
 
 def help(s, **cfg):
   s.addstr(0, 0, 'Next tab:       %s' % '/'.join([ k for k in cfg['key_next'] if type(k) != int]))
